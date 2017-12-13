@@ -3,10 +3,9 @@
  */
 
 // imports
-var sys = require('sys'),
-    fs  = require('fs')
-    parser = require('./lib/parser'),
-    generator = require('./lib/generator');
+const fs  = require('fs');
+const parser = require('./lib/parser');
+const generator = require('./lib/generator');
 
 //exports
 exports.parser = parser;
@@ -15,7 +14,7 @@ exports.version = '0.0.1';
 exports.emptyPGM = emptyPGM;
 
 function emptyPGM(){
-  var emptyPGMBytes = fs.readFileSync('./data/Program01.PGM');
+  var emptyPGMBytes = fs.readFileSync(`${__dirname}/data/Program01.PGM`);
   var pgmParser = parser.createParser();
   pgmParser.parseBytes(emptyPGMBytes);
   return pgmParser.pgm;
