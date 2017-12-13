@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<title>Stephen Norum&#8212;MPC 1000 PGM File Format</title>
+
+<!--[if lt IE 9]>
+<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<style>
+
+table {
+  border-collapse:collapse;
+  border-width: 2px 0;
+  border-style: solid;
+  border-color: black;
+}
+
+th {
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: black;
+}
+
+td {
+  border:0;
+  text-align: center;
+  vertical-align:top;
+  font-family:sans-serif;
+  text-align:center;
+}
+
+th, td {
+  padding: 0.5em 2em;
+}
+
+
+table, td, th, pre {
+  font-family: Menlo, courier, monospace;
+}
+
+tr:nth-child(even) {
+  background:#f5f5f5;
+}
+
+.overview tr {
+  background: #fff;
+  border-width: 0 1px;
+  border-color: #000;
+  border-style: solid;
+}
+
+.overview td {
+  font-family:sans-serif;
+  vertical-align:middle;
+  padding: 0.5em 4em;
+}
+
+td.overview_group  {
+  border-left: 1px solid #000;
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+}
+
+tr.overview_section {
+  border-top: 1px solid #000;
+}
+
+td.overview_ellipsis {
+  border-right: 1px solid white;
+  border-left: 1px solid white;
+}
+
+</style>
+</head>
+<body>
+
+<div id="container">
+<header>
+    <h1>MyBunnyhug</h1>
+</header>
+<nav>
+<ul class="page-nav">
+    <li><a href="/">About</a></li>
+    <li><a href="/software/">Software</a></li>
+    <li><a href="/utilities/">Utilities</a></li>
+    <li class="current"><a href="/fileformats/">File Formats</a></li>
+</ul>
+</nav>
+
+<section>
+<p>
+This page documents the <a href="http://www.akaipro.com/">Akai MPC 1000</a> PGM file format version 1.00.  This information is provided to help developers create software for the MPC 1000.  If information from this page is used in an application, I would love to hear about it.
+</p>
+<p>
+Send me an e-mail at
+<a href="mailto:Stephen%20Norum%20<stephen@mybunnyhug.org>">stephen@mybunnyhug.org</a>
+if you have any questions or comments.
+</p>
+<p>
+Take a look at <a href="/software/">my other projects!</a>
+</p>
+</section>
+
+<section>
+<h2>Sample Code</h2>
+
+<p>
+Download sample MPC 1000 file loading and exporting Python code from <br/>
+<a href="https://github.com/stephenn/pympc1000">https://github.com/stephenn/pympc1000</a>.
+</p>
+</section>
+
+<section>
+<h2>File Layout Overview</h2>
+
+  <table>
+      <tr class="overview_section"><td>Header</td></tr>
+
+      <tr class="overview_section"><td>Pad 0 Sample 0</td></tr>
+      <tr><td>Pad 0 Sample 1</td></tr>
+      <tr><td>Pad 0 Sample 2</td></tr>
+      <tr><td>Pad 0 Sample 3</td></tr>
+      <tr><td>Pad 0</td></tr>
+
+      <tr class="overview_section"><td>Pad 1 Sample 0</td></tr>
+      <tr><td>Pad 1 Sample 1</td></tr>
+      <tr><td>Pad 1 Sample 2</td></tr>
+      <tr><td>Pad 1 Sample 3</td></tr>
+      <tr><td>Pad 1</td></tr>
+
+      <tr class="overview_section"><td class="overview_ellipsis">.<br />.<br />.<br /></td></tr>
+
+      <tr class="overview_section"><td>Pad 63 Sample 0</td></tr>
+      <tr><td>Pad 63 Sample 1</td></tr>
+      <tr><td>Pad 63 Sample 2</td></tr>
+      <tr><td>Pad 63 Sample 3</td></tr>
+      <tr><td>Pad 63</td></tr>
+
+      <tr class="overview_section"><td>MIDI</td></tr>
+
+      <tr class="overview_section"><td>Slider 0</td></tr>
+      <tr><td>Slider 1</td></tr>
+
+      <tr class="overview_section"><td>Footer</td></tr>
+  </table>
+
+    <p>
+    The MPC 1000 PGM file format has five sections: Header, Sample and Pad, MIDI, Slider, and Footer.
+    </p>
+    <p>
+    Up to four samples can be assigned to each of the sixty-four pads.
+    </p>
+</div>
+</section>
+
+<section>
+<h2>File Information and Conventions</h2>
+
+<p>
+All file values are encoded as little-endian 2's complement or ASCII.
+</p>
+
+<p>
+Symbol Definitions:
+<table>
+    <tr>
+        <th>Symbol</th>
+        <th>Description</th>
+        <th>Range</th>
+    </tr>
+    <tr>
+        <td>p</td>
+        <td>Pad number</td>
+        <td>0 &ndash; 63</td>
+    </tr>
+    <tr>
+        <td>s</td>
+        <td>Sample number</td>
+        <td>0 &ndash; 3</td>
+    </tr>
+    <tr>
+        <td>n</td>
+        <td>MIDI note number</td>
+        <td>0 &ndash; 127</td>
+    </tr>
+    <tr>
+        <td>r</td>
+        <td>Slider number</td>
+        <td>0 &ndash; 1</td>
+    </tr>
+</table>
+</p>
+</section>
+
+
+<section>
+<h2>File Layout</h2>
+
+<p>
+Header:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>0x00</td>
+    <td>2</td>
+    <td>File size in bytes</td>
+    <td>uint_16</td>
+    <td>0x2A04</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>0x02</td>
+    <td>2</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>0x04</td>
+    <td>16</td>
+    <td>Filetype String</td>
+    <td>int_8 array</td>
+    <td>&quot;MPC1000 PGM 1.00&quot;</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>0x14</td>
+    <td>4</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+</p>
+
+<p>
+Sample Data:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x00</td>
+    <td>16</td>
+    <td>Sample Name</td>
+    <td>int_8 array</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>Extensionless name of assigned sample file. ASCII, right-padded to 16 bytes with 0x00. Only space, alphanumeric characters, and !#$%&amp;'()-@_{} are valid.</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x10</td>
+    <td>1</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x11</td>
+    <td>1</td>
+    <td>Level</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x12</td>
+    <td>1</td>
+    <td>Range Lower</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>Range Upper</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x13</td>
+    <td>1</td>
+    <td>Range Upper</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>Range Lower</td>
+    <td>127</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x14</td>
+    <td>2</td>
+    <td>Tuning</td>
+    <td>int_16</td>
+    <td>&ndash;</td>
+    <td>-3600</td>
+    <td>3600</td>
+    <td>Tuning in cents (1 semitone = 100 cents)</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x16</td>
+    <td>1</td>
+    <td>Play Mode</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>1</td>
+    <td>0=&quot;One Shot&quot;, 1=&quot;Note On&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + (s * 0x18) + 0x17</td>
+    <td>1</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+</p>
+
+<p>
+Pad Data:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x60</td>
+    <td>2</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x62</td>
+    <td>1</td>
+    <td>Voice Overlap</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>1</td>
+    <td>0=&quot;Poly&quot;, 1=&quot;Mono&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x63</td>
+    <td>1</td>
+    <td>Mute Group</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>32</td>
+    <td>0=&quot;Off&quot;, 1 to 32</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x64</td>
+    <td>1</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x65</td>
+    <td>1</td>
+    <td>Unknown</td>
+    <td>int_8</td>
+    <td>0x01</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x66</td>
+    <td>1</td>
+    <td>Attack</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x67</td>
+    <td>1</td>
+    <td>Decay</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x68</td>
+    <td>1</td>
+    <td>Decay Mode</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>1</td>
+    <td>0=&quot;End&quot;, 1=&quot;Start&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x69</td>
+    <td>2</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x6B</td>
+    <td>1</td>
+    <td>Velocity to Level</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x6C</td>
+    <td>5</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x71</td>
+    <td>1</td>
+    <td>Filter 1 Type</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>3</td>
+    <td>0=&quot;Off&quot;, 1=&quot;Lowpass&quot;, 2=&quot;Bandpass&quot;, 3=&quot;Highpass&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x72</td>
+    <td>1</td>
+    <td>Filter 1 Freq</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x73</td>
+    <td>1</td>
+    <td>Filter 1 Res</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x74</td>
+    <td>4</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x78</td>
+    <td>1</td>
+    <td>Filter 1 Velocity to Frequency</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x79</td>
+    <td>1</td>
+    <td>Filter 2 Type</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>4</td>
+    <td>0=&quot;Off&quot;, 1=&quot;Lowpass&quot;, 2=&quot;Bandpass&quot;, 3=&quot;Highpass&quot;, 4=&quot;Link&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x7A</td>
+    <td>1</td>
+    <td>Filter 2 Freq</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x7B</td>
+
+    <td>1</td>
+    <td>Filter 2 Res</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x7C</td>
+    <td>4</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x80</td>
+    <td>1</td>
+    <td>Filter 2 Velocity to Frequency</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x81</td>
+    <td>14</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x8F</td>
+    <td>1</td>
+    <td>Mixer Level</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x90</td>
+    <td>1</td>
+    <td>Mixer Pan</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>0 to 49=Left, 50=Center, 51 to 100=Right</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x91</td>
+    <td>1</td>
+    <td>Output</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>2</td>
+    <td>0=&quot;Stereo&quot;, 1=&quot;1-2&quot;, 2=&quot;3-4&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x92</td>
+    <td>1</td>
+    <td>FX Send</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>2</td>
+    <td>0=&quot;Off&quot;, 1=&quot;1&quot;, 2=&quot;2&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x93</td>
+    <td>1</td>
+    <td>FX Send Level</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x94</td>
+    <td>1</td>
+    <td>Filter Attenuation</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>2</td>
+    <td>0=&quot;0dB&quot;, 1=&quot;-6dB&quot;, 2=&quot;-12dB&quot;</td>
+</tr>
+<tr>
+    <td>(p * 0xA4) + 0x95</td>
+    <td>15</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+</p>
+
+<p>
+MIDI Data:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>0x2918 + p</td>
+    <td>1</td>
+    <td>Pad MIDI Note Values</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>127</td>
+    <td>MIDI note number associated with pad number, p (0 to 63)</td>
+</tr>
+<tr>
+    <td>0x2958 + n</td>
+    <td>1</td>
+    <td>MIDI Note Pad Values</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>64</td>
+    <td>Pad number (0 to 63) associated with the MIDI note number, n (0 to 127).  Unassigned MIDI note numbers are padded with 64, an out-of-range pad number.</td>
+</tr>
+<tr>
+    <td>0x29D8</td>
+    <td>1</td>
+    <td>MIDI Program Change</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>128</td>
+    <td>0=&quot;Off&quot;, 1 to 128</td>
+</tr>
+</table>
+</p>
+
+<p>
+Slider Data:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29D9</td>
+    <td>1</td>
+    <td>Slider r Pad</td>
+    <td>uint_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>63</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DA</td>
+    <td>1</td>
+    <td>Unknown</td>
+    <td>int_8</td>
+    <td>0x01</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DB</td>
+    <td>1</td>
+    <td>Slider r Parameter</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>4</td>
+    <td>0="Tune", 1="Filter", 2="Layer", 3="Attack", 4="Decay"</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DC</td>
+    <td>1</td>
+    <td>Slider r Tune Low</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>-120</td>
+    <td>Slider r Tune High</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DD</td>
+    <td>1</td>
+    <td>Slider r Tune High</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>Slider r Tune Low</td>
+    <td>120</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DE</td>
+    <td>1</td>
+    <td>Slider r Filter Low</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>-50</td>
+    <td>Slider r Filter High</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29DF</td>
+    <td>1</td>
+    <td>Slider r Filter High</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>Slider r Filter Low</td>
+    <td>50</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E0</td>
+    <td>1</td>
+    <td>Slider r Layer Low</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>Slider r Layer High</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E1</td>
+    <td>1</td>
+    <td>Slider r Layer High</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>Slider r Layer Low</td>
+    <td>127</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E2</td>
+    <td>1</td>
+    <td>Slider r Attack Low</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>Slider r Attack High</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E3</td>
+    <td>1</td>
+    <td>Slider r Attack High</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>Slider r Attack Low</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E4</td>
+    <td>1</td>
+    <td>Slider r Decay Low</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>0</td>
+    <td>Slider r Decay High</td>
+    <td>&nbsp;</td>
+</tr>
+<tr>
+    <td>(r * 0x0D) + 0x29E5</td>
+    <td>1</td>
+    <td>Slider r Decay High</td>
+    <td>int_8</td>
+    <td>&ndash;</td>
+    <td>Slider r Decay Low</td>
+    <td>100</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+</p>
+
+<p>
+Footer Data:
+<table class="mpcTable">
+<tr>
+    <th>Offset</th>
+    <th>Size</th>
+    <th>Description</th>
+    <th>Type</th>
+    <th>Value</th>
+    <th>Min Value</th>
+    <th>Max Value</th>
+    <th>Notes</th>
+</tr>
+<tr>
+    <td>0x29F3</td>
+    <td>17</td>
+    <td>Padding</td>
+    <td>&ndash;</td>
+    <td>0x00</td>
+    <td>&ndash;</td>
+    <td>&ndash;</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+</p>
+</section>
+
+<section>
+<h2>File Layout: Python Struct Encoding</h2>
+
+<p>
+The MPC 1000 PGM file format is documented below using Python <a href="http://docs.python.org/library/struct.html">struct</a> module format strings.
+</p>
+
+<p>
+<div class="code">
+<pre>
+header = (
+  <span class="str">'&lt;'</span>    <span class="com"># Little-endian</span>
+  <span class="str">'H'</span>    <span class="com"># File size</span>
+  <span class="str">'2x'</span>   <span class="com"># Padding</span>
+  <span class="str">'16s'</span>  <span class="com"># "MPC1000 PGM 1.00"</span>
+  <span class="str">'4x'</span>   <span class="com"># Padding</span>
+)
+
+sample = (
+  <span class="str">'&lt;'</span>    <span class="com"># Little-endian</span>
+  <span class="str">'16s'</span>  <span class="com"># Sample Name</span>
+  <span class="str">'x'</span>    <span class="com"># Padding</span>
+  <span class="str">'B'</span>    <span class="com"># Level</span>
+  <span class="str">'B'</span>    <span class="com"># Range Upper</span>
+  <span class="str">'B'</span>    <span class="com"># Range Lower</span>
+  <span class="str">'h'</span>    <span class="com"># Tuning</span>
+  <span class="str">'B'</span>    <span class="com"># Play Mode (0="One Shot", 1="Note On")</span>
+  <span class="str">'x'</span>    <span class="com"># Padding</span>
+)
+
+pad = (
+  <span class="str">'&lt;'</span>    <span class="com">#  Little-endian</span>
+  <span class="str">'2x'</span>   <span class="com">#  Padding</span>
+  <span class="str">'b'</span>    <span class="com">#  Voice Overlap (0="Poly", 1="Mono")</span>
+  <span class="str">'b'</span>    <span class="com">#  Mute Group (0="Off", 1 to 32)</span>
+  <span class="str">'x'</span>    <span class="com">#  Padding</span>
+  <span class="str">'B'</span>    <span class="com">#  Unknown</span>
+  <span class="str">'B'</span>    <span class="com">#  Attack   </span>
+  <span class="str">'B'</span>    <span class="com">#  Decay </span>
+  <span class="str">'B'</span>    <span class="com">#  Decay Mode (0="End", 1="Start")</span>
+  <span class="str">'2x'</span>   <span class="com">#  Padding </span>
+  <span class="str">'B'</span>    <span class="com">#  Velocity to Level    </span>
+  <span class="str">'5x'</span>   <span class="com">#  Padding </span>
+  <span class="str">'b'</span>    <span class="com">#  Filter 1 Type (0="Off", 1="Lowpass", 2="Bandpass", 3="Highpass")</span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 1 Freq    </span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 1 Res </span>
+  <span class="str">'4x'</span>   <span class="com">#  Padding</span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 1 Velocity to Frequency   </span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 2 Type (0="Off", 1="Lowpass", 2="Bandpass", 3="Highpass", 4="Link")</span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 2 Freq    </span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 2 Res </span>
+  <span class="str">'4x'</span>   <span class="com">#  Padding</span>
+  <span class="str">'B'</span>    <span class="com">#  Filter 2 Velocity to Frequency   </span>
+  <span class="str">'14x'</span>  <span class="com">#  Padding  </span>
+  <span class="str">'B'</span>    <span class="com">#  Mixer Level </span>
+  <span class="str">'B'</span>    <span class="com">#  Mixer Pan (0 to 49=Left, 50=Center, 51 to 100=Right)</span>
+  <span class="str">'B'</span>    <span class="com">#  Output (0="Stereo", 1="1-2", 2="3-4")</span>
+  <span class="str">'B'</span>    <span class="com">#  FX Send (0="Off", 1="1", 2="2")</span>
+  <span class="str">'B'</span>    <span class="com">#  FX Send Level </span>
+  <span class="str">'B'</span>    <span class="com">#  Filter Attenuation (0="0dB", 1="-6dB", 2="-12dB")</span>
+  <span class="str">'15x'</span>  <span class="com">#  Padding</span>
+)
+
+midi = (
+  <span class="str">'&lt;'</span>    <span class="com"># Little-endian</span>
+  <span class="str">'64B'</span>  <span class="com"># Pad MIDI note mapping</span>
+  <span class="str">'128B'</span> <span class="com"># MIDI note pad mapping</span>
+  <span class="str">'B'</span>    <span class="com"># MIDI Program Change (0="Off", 1 to 128)</span>
+)
+
+slider = (
+  <span class="str">'&lt;'</span>    <span class="com"># Little-endian</span>
+  <span class="str">'B'</span>    <span class="com"># Slider Pad</span>
+  <span class="str">'B'</span>    <span class="com"># Unknown</span>
+  <span class="str">'B'</span>    <span class="com"># Slider Parameter (0="Tune", 1="Filter", 2="Layer", 3="Attack", 4="Decay")</span>
+  <span class="str">'b'</span>    <span class="com"># Slider Tune Low  </span>
+  <span class="str">'b'</span>    <span class="com"># Slider Tune High</span>
+  <span class="str">'b'</span>    <span class="com"># Slider Filter Low   </span>
+  <span class="str">'b'</span>    <span class="com"># Slider Filter High  </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Layer Low    </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Layer High   </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Attack Low   </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Attack High  </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Decay Low    </span>
+  <span class="str">'B'</span>    <span class="com"># Slider Decay High   </span>
+)
+
+footer = (
+  <span class="str">'&lt;'</span>    <span class="com"># Little-endian</span>
+  <span class="str">'17x'</span>  <span class="com"># Padding</span>
+)
+</pre>
+</div>
+</p>
+</section>
+
+
+
+</div>
+<div class="push"><!--Sticky Footer Push--></div>
+</div>
+<footer>
+<a href="mailto:Stephen%20Norum%20<stephen@mybunnyhug.org>">Stephen Norum<br />stephen@mybunnyhug.org</a>
+</footer>
+</body>
+</html>
